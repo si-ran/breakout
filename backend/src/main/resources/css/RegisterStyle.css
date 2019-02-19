@@ -1,0 +1,23 @@
+.card{
+    width: 30%;
+    margin: 3% auto;
+    min-width: 350px;
+}
+
+.signUpFrom{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 30px 5% 100px 5%;
+    min-height: 300px;
+}
+.signUpFrom>.form-content{
+    margin: 10px;
+}
+.signUpFrom>.form-content input{
+    margin: 10px 0;
+}
+.signUpFrom>.form-submit button{
+    margin:0 0 30px 0;
+    background-color: #b6e1ff;
+}
