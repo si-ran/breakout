@@ -44,7 +44,7 @@ case class BreakerDoublePlay(
   )
   var emojiList: List[Emoji] = Nil
   var pearlShowTime: Int = 0
-  var isPearlTrans: Byte = 0
+  var isPearlTrans: Byte = 0 // pearl水平移动
   var isAddBricks: Boolean = false
 
   var shield = new ShieldClient(shieldPosition)
@@ -54,6 +54,8 @@ case class BreakerDoublePlay(
   var otherShield = new ShieldClient(shieldPosition)
   var otherPearl = new PearlClient(pearlPosition)
   var otherBricks: List[BrickClient] = bricksPosition.map{ p => new BrickClient(p, 1) }
+
+  var shotPearls: List[PearlClient] = Nil //散弹
 
   override def drawGameByTime(offsetTime:Long): Unit ={
     ctx.save()
@@ -83,7 +85,7 @@ case class BreakerDoublePlay(
 
     drawBricks(otherBricks, otherWindowScale, otherWindowView)
     drawOneShield(otherShield, otherWindowScale, otherWindowView)
-    drawPearl(otherPearl, 0, otherWindowScale, otherWindowView)
+    drawPearl(otherPearl, 0, otherWindowScale, otherWindowView, isLast = false)
 
     ctx.save()
     ctx.beginPath()
@@ -104,15 +106,16 @@ case class BreakerDoublePlay(
 
     drawBricks(bricks, 1, myWindowView)
     drawOneShield(shield, 1, myWindowView)
-    drawPearl(pearl, offsetTime, 1, myWindowView)
+    drawPearl(pearl, offsetTime, 1, myWindowView, true)
+    shotPearls.foreach(drawPearl(_, offsetTime, 1, myWindowView, false))
 
     ctx.restore()
 
     if(winnerOpt.nonEmpty){
       ctx.save()
-      ctx.fillStyle = "rgba(0,0,0,0.4)"
+      ctx.fillStyle = "rgba(0,0,0,0.5)"
       ctx.fillRect(0, 0, canvasBoundary.x, canvasBoundary.y)
-      ctx.fillStyle = "rgba(0,0,0,1)"
+      ctx.fillStyle = "#99ffed"
       ctx.font = "60px Comic Sans Ms"
       ctx.textAlign = "center"
       ctx.fillText(s"${winnerOpt.get} win!!", canvasBoundary.x / 2, canvasBoundary.y / 2)
@@ -148,6 +151,7 @@ case class BreakerDoublePlay(
       case _ =>
     }
     pearl.position = pearl.position + pearl.speed
+    shotPearls.foreach(p => p.position = p.position + p.speed)
   }
 
   def pearlChangeSpeed(rect: RectangleOfBreaker): Unit ={
@@ -178,6 +182,18 @@ case class BreakerDoublePlay(
         gameScore += 1
       }
       pearlChangeSpeed(brick)
+    }
+    //散弹判断
+    shotPearls.foreach{ shotPearl =>
+      var isCollied = false
+      bricks.foreach{ brick =>
+        if (shotPearl.collided(brick) != 0 && !isCollied) {
+          bricks = bricks.filterNot(t => t == brick)
+          gameScore += 1
+          isCollied = true
+          shotPearls = shotPearls.filterNot(_ == shotPearl)
+        }
+      }
     }
 
 
@@ -223,6 +239,13 @@ case class BreakerDoublePlay(
         isAddBricks = true
       case MinusScore(score) =>
         gameScore -= score
+      case ShotGun =>
+        if (gameScore >= 3){
+          shotPearls = (0 to 2).toList.map{ _ =>
+            new PearlClient(pearl.position, pearl.speed + Point(random.nextFloat() * pearl.speed.x, random.nextFloat() * pearl.speed.y))
+          }
+          gameScore -= 3
+        }
       case _ =>
     }
   }

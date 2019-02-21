@@ -49,6 +49,8 @@ object BreakerEvent {
 
   final case object AddBricks extends GamePlayEvent
 
+  final case object ShotGun extends GamePlayEvent
+
   final case class MinusScore(score: Int) extends GamePlayEvent
 
   final case class BreakerGameOver(winner: String) extends GamePlayEvent

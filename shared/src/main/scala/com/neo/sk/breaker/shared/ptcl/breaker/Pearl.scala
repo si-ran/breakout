@@ -23,13 +23,13 @@ trait Pearl extends CircleOfBreaker{
 
 }
 
-class PearlClient(initPosition: Point) extends Pearl{
+class PearlClient(initPosition: Point, initSpeed: Point = Point(20, -20)) extends Pearl{
 
   override var position: Point = initPosition
 
   override val radius: Float = 10
 
-  override var speed: Point = Point(20, -20)
+  override var speed: Point = initSpeed
 
   override var isShow: Boolean = true
 

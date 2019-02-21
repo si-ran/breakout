@@ -11,7 +11,14 @@ import com.neo.sk.breaker.shared.ptcl.model.Point
   */
 trait DrawPearl { this: BreakerDoublePlay =>
 
-  def drawPearl(pearl: PearlClient, offsetTime: Long, scale: Double, offsetPosition: Point): Unit ={
+  case class PearlTail(
+    point: Point,
+    var trans: Float,
+  )
+  var pearlPositionList: List[PearlTail] = Nil
+  var isSavePearlPosition: Int = 1
+
+  def drawPearl(pearl: PearlClient, offsetTime: Long, scale: Double, offsetPosition: Point, isLast: Boolean): Unit ={
     if(pearl.isShow){
       val offsetPoint =
         isPearlTrans match {
@@ -22,6 +29,26 @@ trait DrawPearl { this: BreakerDoublePlay =>
           case _ =>
             pearl.speed * offsetTime / 120.0f
         }
+      //甩尾
+      if(isLast){ pearlPositionList.foreach{ point =>
+        ctx.save()
+        ctx.beginPath()
+        ctx.fillStyle = s"rgba(0,191,255,${point.trans})"
+        ctx.arc(
+          point.point.x * scale + offsetPosition.x,
+          point.point.y * scale + offsetPosition.y,
+          (pearl.radius + 2) * scale - (0.2 - point.trans) * 25,
+          0,
+          math.Pi * 2)
+        ctx.fill()
+        ctx.restore()
+      }
+        pearlPositionList = PearlTail(Point(pearl.position.x + offsetPoint.x, pearl.position.y + offsetPoint.y), 0.2f) :: pearlPositionList
+        pearlPositionList.foreach(p => p.trans = p.trans - 0.008f)
+        pearlPositionList = pearlPositionList.take(24)
+      }
+
+      //主体
       ctx.save()
       ctx.beginPath()
       val grd = ctx.createRadialGradient(
@@ -32,8 +59,8 @@ trait DrawPearl { this: BreakerDoublePlay =>
         (pearl.position.y + offsetPoint.y) * scale + offsetPosition.y,
         pearl.radius * scale
       )
-      grd.addColorStop(1, "#00bfff")
       grd.addColorStop(0, "#7adeff")
+      grd.addColorStop(1, "#00bfff")
       ctx.fillStyle = grd
       ctx.strokeStyle = "#00bfff"
       ctx.lineWidth = 3
@@ -45,6 +72,7 @@ trait DrawPearl { this: BreakerDoublePlay =>
         math.Pi * 2)
       ctx.stroke()
       ctx.fill()
+
       ctx.restore()
     }
     else{

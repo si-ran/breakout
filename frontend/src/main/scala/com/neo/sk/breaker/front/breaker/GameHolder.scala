@@ -151,9 +151,9 @@ class GameHolder(canvasName:String) {
     breakerSchemaImplOpt.foreach {
       case breakerDoublePlay: BreakerDoublePlay =>
         websocketClient.sendByteMsg(breakerDoublePlay.getUserState)
-        if(breakerDoublePlay.gameScore >= 2){
+        if(breakerDoublePlay.gameScore >= 8){
           websocketClient.sendByteMsg(SendAddBricks)
-          breakerDoublePlay.preExecuteUserEvent(BreakerEvent.MinusScore(2))
+          breakerDoublePlay.preExecuteUserEvent(BreakerEvent.MinusScore(8))
         }
         if(breakerDoublePlay.bricks.exists(_.position.y >= 340)){
           websocketClient.sendByteMsg(BreakerEvent.SendGameOver)
@@ -222,13 +222,15 @@ class GameHolder(canvasName:String) {
                   breakerSchemaImplOpt.foreach{
                     case breakerSchemaImpl: BreakerDoublePlay =>
                       //FIXME 为了显示需要，otherBricks多画了一行
-                      breakerSchemaImpl.otherBricks.foreach{ brick =>
-                        brick.position = Point(brick.position.x, brick.position.y + brick.height)
-                      }
                       val newBricks = (0 to 9).map{ cnt =>
                         new BrickClient(Point(cnt * 80, 0), 1)
                       }.toList
-                      if(winner != myName)breakerSchemaImpl.otherBricks = newBricks ::: breakerSchemaImpl.otherBricks
+                      if(winner == myName){
+                        breakerSchemaImpl.otherBricks.foreach{ brick =>
+                          brick.position = Point(brick.position.x, brick.position.y + brick.height)
+                        }
+                        breakerSchemaImpl.otherBricks = newBricks ::: breakerSchemaImpl.otherBricks
+                      }
 
                       breakerSchemaImpl.winnerOpt = Some(winner)
 
@@ -250,7 +252,7 @@ class GameHolder(canvasName:String) {
 
   def menuActionListenEvent(): Unit ={
     canvas.focus()
-    canvas.onclick = {e: MouseEvent =>
+    canvas.onmousedown = {e: MouseEvent =>
       breakerSchemaImplOpt.foreach{ breakerSchemaImpl =>
         val state = breakerSchemaImpl.instantExecuteUserEvent(BreakerEvent.MouseClick(e.clientX, e.clientY))
         switchState(state)
@@ -264,7 +266,7 @@ class GameHolder(canvasName:String) {
 
   def soloActionListenEvent(): Unit ={
     canvas.focus()
-    canvas.onclick = { e:MouseEvent =>
+    canvas.onmousedown = { e:MouseEvent =>
       e.preventDefault()
     }
     canvas.onkeypress = { e:KeyboardEvent =>
@@ -282,13 +284,18 @@ class GameHolder(canvasName:String) {
 
   def doubleActionListenEvent(): Unit ={
     canvas.focus()
-    canvas.onclick = { e:MouseEvent =>
+    canvas.oncontextmenu = _ => false //取消右键弹出行为
+    canvas.onmousedown = { e:MouseEvent =>
       e.button match {
         case 0 =>
+          breakerSchemaImplOpt.foreach(_.preExecuteUserEvent(BreakerEvent.PearlTrans(1)))
           if(breakerSchemaImplOpt.get.asInstanceOf[BreakerDoublePlay].winnerOpt.nonEmpty){
             breakerSchemaImplOpt.get.asInstanceOf[BreakerDoublePlay].winnerOpt = None
             switchState(GameState.mainMenu)
           }
+        case 2 =>
+          println("on 2")
+          breakerSchemaImplOpt.foreach(_.preExecuteUserEvent(BreakerEvent.PearlTrans(2)))
         case _ =>
           println("unknown")
       }
@@ -313,9 +320,9 @@ class GameHolder(canvasName:String) {
         case "8" =>
           websocketClient.sendByteMsg(SendEmoji(8))
         case "q" =>
-          breakerSchemaImplOpt.foreach(_.preExecuteUserEvent(BreakerEvent.PearlTrans(1)))
+          breakerSchemaImplOpt.foreach(_.preExecuteUserEvent(BreakerEvent.ShotGun))
         case "e" =>
-          breakerSchemaImplOpt.foreach(_.preExecuteUserEvent(BreakerEvent.PearlTrans(2)))
+
         case "a" =>
           breakerSchemaImplOpt.foreach(_.instantExecuteUserEvent(BreakerEvent.ShieldMove(1)))
         case "d" =>
