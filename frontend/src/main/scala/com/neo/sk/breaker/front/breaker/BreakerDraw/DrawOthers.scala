@@ -48,13 +48,24 @@ trait DrawOthers { this: BreakerDoublePlay =>
   def drawEnergy(energy: Int, viewPosition: Point, scale: Double): Unit ={
     ctx.save()
     ctx.beginPath()
+    ctx.rect(viewPosition.x + boundary.x * scale, viewPosition.y + (boundary.y * scale - boundary.y * scale * energy / 9), 25 * scale, boundary.y * scale * energy / 9)
+    ctx.fillStyle = "#ecb883"
+    ctx.fill()
+    ctx.beginPath()
     ctx.rect(viewPosition.x + boundary.x * scale, viewPosition.y, 25 * scale, boundary.y * scale)
     ctx.stroke()
-    ctx.beginPath()
-    ctx.rect(viewPosition.x + boundary.x * scale, viewPosition.y + (boundary.y - boundary.y * scale * energy / 9), 25 * scale, boundary.y * scale * energy / 9)
-    ctx.fillStyle = "#ecb883"
-    ctx.fill
     ctx.restore()
+  }
+
+  def drawShot(): Unit ={
+    ctx.save()
+    ctx.beginPath()
+    ctx.font = "bold 30px Comic Sans Ms"
+    ctx.textAlign = "center"
+    ctx.fillStyle = "rgba(242, 141, 105, 0.6)"
+    ctx.fillText("SHOT!!!", otherWindowView.x + boundary.x * otherWindowScale / 2, otherWindowView.y + boundary.y * otherWindowScale / 3 + 1 * drawShotTime)
+    ctx.restore()
+    drawShotTime -= 1
   }
 
 }

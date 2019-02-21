@@ -57,7 +57,9 @@ class GameHolder(canvasName:String) {
   private var gameLoopTimer: Int = 0
   private var gameLoopCnt: Int = 0
 
-  private var nextFrame = 0
+  private var nextFrameMenu = 0
+  private var nextFrameSolo = 0
+  private var nextFrameDouble = 0
   private var logicFrameTime = System.currentTimeMillis()
 
   //游戏启动
@@ -70,7 +72,9 @@ class GameHolder(canvasName:String) {
   }
 
   def switchState(state: Int): Unit ={
-    dom.window.cancelAnimationFrame(nextFrame)
+    dom.window.cancelAnimationFrame(nextFrameMenu)
+    dom.window.cancelAnimationFrame(nextFrameSolo)
+    dom.window.cancelAnimationFrame(nextFrameDouble)
 
     gameState = state
     gameState match {
@@ -117,14 +121,14 @@ class GameHolder(canvasName:String) {
     val curTime = System.currentTimeMillis()
     val offsetTime = curTime - logicFrameTime
     breakerSchemaImplOpt.foreach(_.drawGameByTime(offsetTime))
-    nextFrame = dom.window.requestAnimationFrame(soloGameRender())
+    nextFrameMenu = dom.window.requestAnimationFrame(menuRender())
   }
 
   def soloGameRender():Double => Unit = {d =>
     val curTime = System.currentTimeMillis()
     val offsetTime = curTime - logicFrameTime
     breakerSchemaImplOpt.foreach(_.drawGameByTime(offsetTime))
-    nextFrame = dom.window.requestAnimationFrame(soloGameRender())
+    nextFrameSolo = dom.window.requestAnimationFrame(soloGameRender())
   }
 
   def doubleGameRender():Double => Unit = {d =>
@@ -139,9 +143,9 @@ class GameHolder(canvasName:String) {
       ctx.fillText("find player...", canvas.width / 2, canvas.height / 2)
       ctx.restore()
     }
-
     else breakerSchemaImplOpt.foreach(_.drawGameByTime(offsetTime))
-    nextFrame = dom.window.requestAnimationFrame(soloGameRender())
+
+    nextFrameDouble = dom.window.requestAnimationFrame(doubleGameRender())
   }
 
   def gameLoop(): Unit ={
@@ -151,10 +155,12 @@ class GameHolder(canvasName:String) {
     breakerSchemaImplOpt.foreach {
       case breakerDoublePlay: BreakerDoublePlay =>
         websocketClient.sendByteMsg(breakerDoublePlay.getUserState)
+
         if(breakerDoublePlay.gameEnergy >= 9){
           websocketClient.sendByteMsg(SendAddBricks)
           breakerDoublePlay.preExecuteUserEvent(BreakerEvent.MinusScore(9))
         }
+
         if(breakerDoublePlay.bricks.exists(_.position.y >= 340)){
           websocketClient.sendByteMsg(BreakerEvent.SendGameOver)
         }
@@ -197,9 +203,10 @@ class GameHolder(canvasName:String) {
                     breakerSchemaImplOpt = Some(BreakerDoublePlay(ctx, bounds, canvasBoundary, myName, otherState.name, myState.shield, myState.pearl, myState.bricks))
                     pageRender()
                   }
-                  else if(gameState == GameState.doublePlay){
-                    val otherState: BreakerEvent.UserGameState = states.find(_.name != myName).get
-                    breakerSchemaImplOpt.foreach(_.instantExecuteUserEvent(GameStateUpdate(otherState.shield, otherState.pearl, otherState.bricks)))
+
+                case state: BreakerEvent.UserGameState =>
+                  if(gameState == GameState.doublePlay){
+                    breakerSchemaImplOpt.foreach(_.preExecuteUserEvent(GameStateUpdate(state.shield, state.pearl, state.bricks, state.energy)))
                   }
 
                 case BreakerEvent.GameStop(msg) =>
@@ -217,6 +224,9 @@ class GameHolder(canvasName:String) {
                   if(gameState == GameState.doublePlay){
                     breakerSchemaImplOpt.foreach(_.preExecuteUserEvent(BreakerEvent.AddBricks))
                   }
+
+                case BreakerEvent.GetShot =>
+                  breakerSchemaImplOpt.foreach(_.preExecuteUserEvent(BreakerEvent.DrawShotGun))
 
                 case BreakerEvent.GetGameOver(winner) =>
                   breakerSchemaImplOpt.foreach{
@@ -289,12 +299,12 @@ class GameHolder(canvasName:String) {
       e.button match {
         case 0 =>
           breakerSchemaImplOpt.foreach(_.preExecuteUserEvent(BreakerEvent.PearlTrans(1)))
+          //FIXME breakerSchemaImplOpt is none
           if(breakerSchemaImplOpt.get.asInstanceOf[BreakerDoublePlay].winnerOpt.nonEmpty){
             breakerSchemaImplOpt.get.asInstanceOf[BreakerDoublePlay].winnerOpt = None
             switchState(GameState.mainMenu)
           }
         case 2 =>
-          println("on 2")
           breakerSchemaImplOpt.foreach(_.preExecuteUserEvent(BreakerEvent.PearlTrans(2)))
         case _ =>
           println("unknown")
@@ -320,6 +330,10 @@ class GameHolder(canvasName:String) {
         case "8" =>
           websocketClient.sendByteMsg(SendEmoji(8))
         case "q" =>
+          //FIXME 冗余写法
+          if(breakerSchemaImplOpt.map(_.isInstanceOf[BreakerDoublePlay]).get)
+            if(breakerSchemaImplOpt.get.asInstanceOf[BreakerDoublePlay].gameSkillValue >= 4)
+              websocketClient.sendByteMsg(BreakerEvent.SendShot)
           breakerSchemaImplOpt.foreach(_.preExecuteUserEvent(BreakerEvent.ShotGun))
         case "e" =>
 

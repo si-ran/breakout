@@ -53,7 +53,7 @@ object UserActor {
 
   final case class UserJoinRoomSuccess(roomActor: ActorRef[RoomActor.Command], gameState: RoomGameState) extends Command
 
-  final case class UserAccord(state: RoomGameState) extends Command
+  final case class UserAccord(state: UserGameState) extends Command
 
   def flow(selfActor: ActorRef[Command]): Flow[WsMessage, WsMsg, NotUsed] ={
     val in: Sink[WsMessage, NotUsed] = Flow[WsMessage].to(ActorSink.actorRef[Command](selfActor, TextGet, TextFailure))
@@ -182,6 +182,9 @@ object UserActor {
             case SendEmoji(t) =>
               roomActor ! RoomActor.ShowEmoji(userName, t)
               Behaviors.same
+            case SendShot =>
+              roomActor ! RoomActor.ShotGun(userName)
+              Behaviors.same
             case SendAddBricks =>
               roomActor ! RoomActor.AddBricks(userName)
               Behaviors.same
@@ -199,6 +202,9 @@ object UserActor {
               Behaviors.same
             case GetAddBricks =>
               dispatchTo(frontActor, GetAddBricks)
+              Behaviors.same
+            case GetShot =>
+              dispatchTo(frontActor, GetShot)
               Behaviors.same
             case GetGameOver(winner) =>
               dispatchTo(frontActor, GetGameOver(winner))

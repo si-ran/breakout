@@ -25,11 +25,13 @@ object BreakerEvent {
 
   final case class SendEmoji(t: Byte) extends GameFrontEvent
 
+  final case object SendShot extends GameFrontEvent
+
   final case object SendAddBricks extends GameFrontEvent
 
   final case object SendGameOver extends GameFrontEvent
 
-  final case class UserGameState(name: String, shield: Point, pearl: Point, bricks: List[Point]) extends GameFrontEvent with GameBackendEvent
+  final case class UserGameState(name: String, shield: Point, pearl: Point, bricks: List[Point], energy: Int) extends GameFrontEvent with GameBackendEvent
 
   //
   final case class RoomGameState(states: List[UserGameState]) extends GameBackendEvent
@@ -39,6 +41,8 @@ object BreakerEvent {
   final case class GetEmoji(name: String, t: Byte) extends GameBackendEvent
 
   final case object GetAddBricks extends GameBackendEvent
+
+  final case object GetShot extends GameBackendEvent
 
   final case class GetGameOver(win: String) extends GameBackendEvent
 
@@ -51,13 +55,15 @@ object BreakerEvent {
 
   final case object ShotGun extends GamePlayEvent
 
+  final case object DrawShotGun extends GamePlayEvent
+
   final case class MinusScore(score: Int) extends GamePlayEvent
 
   final case class BreakerGameOver(winner: String) extends GamePlayEvent
 
   final case class MouseClick(x: Double, y: Double) extends GamePlayEvent
 
-  final case class GameStateUpdate(shield: Point, pearl: Point, bricks: List[Point]) extends GamePlayEvent
+  final case class GameStateUpdate(shield: Point, pearl: Point, bricks: List[Point], energy: Int) extends GamePlayEvent
 
   //
   sealed trait WsMsg extends GameBackendEvent

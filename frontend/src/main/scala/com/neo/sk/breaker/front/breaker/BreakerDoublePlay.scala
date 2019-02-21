@@ -46,8 +46,10 @@ case class BreakerDoublePlay(
   )
   var emojiList: List[Emoji] = Nil
   var pearlShowTime: Int = 0
+  var drawShotTime: Int = 0
   var isPearlTrans: Byte = 0 // pearl水平移动
   var isAddBricks: Boolean = false
+  var isStateUpdate: Option[GameStateUpdate] = None
 
   var shield = new ShieldClient(shieldPosition)
   var pearl = new PearlClient(pearlPosition)
@@ -85,11 +87,12 @@ case class BreakerDoublePlay(
     ctx.stroke()
     ctx.restore()
 
-    drawEnergy(1, otherWindowView, otherWindowScale)
+    drawEnergy(otherGameEnergy, otherWindowView, otherWindowScale)
 
     drawBricks(otherBricks, otherWindowScale, otherWindowView)
     drawOneShield(otherShield, otherWindowScale, otherWindowView)
     drawPearl(otherPearl, 0, otherWindowScale, otherWindowView, isLast = false)
+    if(drawShotTime > 0) drawShot()
 
     ctx.save()
     ctx.beginPath()
@@ -140,6 +143,7 @@ case class BreakerDoublePlay(
     }
 
     updateBricks()
+    updateOtherState()
 
     emojiList = emojiList.filterNot(_.time <= 0)
     emojiList.foreach(_.time -= 1)
@@ -239,8 +243,21 @@ case class BreakerDoublePlay(
     }
   }
 
+  def updateOtherState(): Unit ={
+    if(isStateUpdate.nonEmpty){
+      val otherState = isStateUpdate.get
+      otherShield.position = otherState.shield
+      otherPearl.position = otherState.pearl
+      otherBricks = otherState.bricks.map(p => new BrickClient(p, 1))
+      otherGameEnergy = otherState.energy
+      isStateUpdate = None
+    }
+  }
+
   override def preExecuteUserEvent(event: GamePlayEvent): Unit = {
     event match {
+      case otherState: GameStateUpdate =>
+        isStateUpdate = Some(otherState)
       case PearlTrans(dir) =>
         isPearlTrans = dir
       case AddBricks =>
@@ -254,17 +271,14 @@ case class BreakerDoublePlay(
           } ::: shotPearls
           gameSkillValue -= 4
         }
+      case DrawShotGun =>
+        drawShotTime = 40
       case _ =>
     }
   }
 
   override def instantExecuteUserEvent(event: GamePlayEvent): Int = {
     event match {
-      case otherState: GameStateUpdate =>
-        otherShield.position = otherState.shield
-        otherPearl.position = otherState.pearl
-        otherBricks = otherState.bricks.map(p => new BrickClient(p, 1))
-        GameState.remain
       case ShieldMove(dir) =>
         if(dir == 1 && shield.position.x > 1) shield.changePosition(1)
         else if(dir == 2 && shield.position.x + shield.width < boundary.x - 1) shield.changePosition(2)
@@ -282,7 +296,8 @@ case class BreakerDoublePlay(
       myName,
       shield.position,
       pearl.position,
-      bricks.map(_.position)
+      bricks.map(_.position),
+      gameEnergy
     )
   }
 

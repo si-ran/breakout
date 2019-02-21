@@ -45,6 +45,8 @@ object RoomActor {
 
   final case class AddBricks(name: String) extends Command
 
+  final case class ShotGun(name: String) extends Command
+
   final case class OneSideWin(loser: String) extends Command
 
   private[this] def switchBehavior(
@@ -111,8 +113,8 @@ object RoomActor {
     Behaviors.receive[Command]{(ctx, msg) =>
       msg match {
         case GameLoop =>
-          user1.actor ! UserActor.UserAccord(RoomGameState(List(roomClient.getUserState(user1.name), roomClient.getUserState(user2.name))))
-          user2.actor ! UserActor.UserAccord(RoomGameState(List(roomClient.getUserState(user1.name), roomClient.getUserState(user2.name))))
+          user1.actor ! UserActor.UserAccord(roomClient.getUserState(user2.name))
+          user2.actor ! UserActor.UserAccord(roomClient.getUserState(user1.name))
           timer.startSingleTimer(GameUpdateKey, GameLoop, 120.millis)
           Behaviors.same
 
@@ -132,6 +134,15 @@ object RoomActor {
         case ShowEmoji(name, t) =>
           user1.actor ! WsBackMessage(GetEmoji(name, t))
           user2.actor ! WsBackMessage(GetEmoji(name, t))
+          Behaviors.same
+
+        case ShotGun(name) =>
+            if(user1.name != name){
+              user1.actor ! WsBackMessage(GetShot)
+            }
+            else{
+              user2.actor ! WsBackMessage(GetShot)
+            }
           Behaviors.same
 
         case AddBricks(name) =>
