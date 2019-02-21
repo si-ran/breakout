@@ -151,9 +151,9 @@ class GameHolder(canvasName:String) {
     breakerSchemaImplOpt.foreach {
       case breakerDoublePlay: BreakerDoublePlay =>
         websocketClient.sendByteMsg(breakerDoublePlay.getUserState)
-        if(breakerDoublePlay.gameScore >= 8){
+        if(breakerDoublePlay.gameEnergy >= 9){
           websocketClient.sendByteMsg(SendAddBricks)
-          breakerDoublePlay.preExecuteUserEvent(BreakerEvent.MinusScore(8))
+          breakerDoublePlay.preExecuteUserEvent(BreakerEvent.MinusScore(9))
         }
         if(breakerDoublePlay.bricks.exists(_.position.y >= 340)){
           websocketClient.sendByteMsg(BreakerEvent.SendGameOver)

@@ -1,6 +1,6 @@
 package com.neo.sk.breaker.front.breaker
 
-import com.neo.sk.breaker.front.breaker.BreakerDraw.{DrawBricks, DrawEmoji, DrawPearl, DrawShield}
+import com.neo.sk.breaker.front.breaker.BreakerDraw.{DrawBricks, DrawOthers, DrawPearl, DrawShield}
 import com.neo.sk.breaker.shared.ptcl.Constants.GameState
 import com.neo.sk.breaker.shared.ptcl.breaker.{BrickClient, PearlClient, ShieldClient}
 import com.neo.sk.breaker.shared.ptcl.component.RectangleOfBreaker
@@ -27,14 +27,16 @@ case class BreakerDoublePlay(
 ) extends BreakerSchemaImplClient
   with DrawShield
   with DrawPearl
-  with DrawEmoji
+  with DrawOthers
   with DrawBricks{
 
   val myWindowView = Point(260, 25)
   val otherWindowView = Point(70, 25)
   val otherWindowScale = 0.2
 
-  var gameScore: Int = 0
+  var gameEnergy: Int = 0
+  var otherGameEnergy: Int = 0
+  var gameSkillValue: Int = 0
   var winnerOpt: Option[String] = None
 
   case class Emoji(
@@ -63,7 +65,7 @@ case class BreakerDoublePlay(
     ctx.clearRect(0, 0, dom.window.innerWidth, dom.window.innerHeight)
 
     drawEmojiList()
-    drawScore()
+    drawSkillValue()
 
     //FIXME 缩放
     ctx.save()
@@ -82,6 +84,8 @@ case class BreakerDoublePlay(
     ctx.strokeStyle = "red"
     ctx.stroke()
     ctx.restore()
+
+    drawEnergy(1, otherWindowView, otherWindowScale)
 
     drawBricks(otherBricks, otherWindowScale, otherWindowView)
     drawOneShield(otherShield, otherWindowScale, otherWindowView)
@@ -104,10 +108,12 @@ case class BreakerDoublePlay(
     ctx.stroke()
     ctx.restore()
 
+    drawEnergy(gameEnergy, myWindowView, 1)
+
     drawBricks(bricks, 1, myWindowView)
     drawOneShield(shield, 1, myWindowView)
-    drawPearl(pearl, offsetTime, 1, myWindowView, true)
-    shotPearls.foreach(drawPearl(_, offsetTime, 1, myWindowView, false))
+    drawPearl(pearl, offsetTime, 1, myWindowView, isLast = true)
+    shotPearls.foreach(drawPearl(_, offsetTime, 1, myWindowView, isLast = false))
 
     ctx.restore()
 
@@ -179,7 +185,8 @@ case class BreakerDoublePlay(
     bricks.foreach{ brick =>
       if (pearl.collided(brick) != 0) {
         bricks = bricks.filterNot(t => t == brick)
-        gameScore += 1
+        gameEnergy += 1
+        gameSkillValue += 1
       }
       pearlChangeSpeed(brick)
     }
@@ -189,7 +196,8 @@ case class BreakerDoublePlay(
       bricks.foreach{ brick =>
         if (shotPearl.collided(brick) != 0 && !isCollied) {
           bricks = bricks.filterNot(t => t == brick)
-          gameScore += 1
+          gameEnergy += 1
+          gameSkillValue += 1
           isCollied = true
           shotPearls = shotPearls.filterNot(_ == shotPearl)
         }
@@ -238,13 +246,13 @@ case class BreakerDoublePlay(
       case AddBricks =>
         isAddBricks = true
       case MinusScore(score) =>
-        gameScore -= score
+        gameEnergy -= score
       case ShotGun =>
-        if (gameScore >= 3){
+        if (gameSkillValue >= 4){
           shotPearls = (0 to 2).toList.map{ _ =>
             new PearlClient(pearl.position, pearl.speed + Point(random.nextFloat() * pearl.speed.x, random.nextFloat() * pearl.speed.y))
-          }
-          gameScore -= 3
+          } ::: shotPearls
+          gameSkillValue -= 4
         }
       case _ =>
     }
