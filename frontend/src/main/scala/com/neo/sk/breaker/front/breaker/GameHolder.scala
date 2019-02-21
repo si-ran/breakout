@@ -6,6 +6,7 @@ import com.neo.sk.breaker.front.utils.byteObject.MiddleBufferInJs
 import com.neo.sk.breaker.front.utils.{JsFunc, Shortcut}
 import com.neo.sk.breaker.shared.ptcl
 import com.neo.sk.breaker.shared.ptcl.Constants.GameState
+import com.neo.sk.breaker.shared.ptcl.breaker.BrickClient
 import com.neo.sk.breaker.shared.ptcl.model.{Boundary, Point}
 import com.neo.sk.breaker.shared.ptcl.protocol._
 import com.neo.sk.breaker.shared.ptcl.protocol.BreakerEvent.{GameBackendEvent, GameStateUpdate, SendAddBricks, SendEmoji}
@@ -150,9 +151,9 @@ class GameHolder(canvasName:String) {
     breakerSchemaImplOpt.foreach {
       case breakerDoublePlay: BreakerDoublePlay =>
         websocketClient.sendByteMsg(breakerDoublePlay.getUserState)
-        if(breakerDoublePlay.gameScore >= 8){
+        if(breakerDoublePlay.gameScore >= 2){
           websocketClient.sendByteMsg(SendAddBricks)
-          breakerDoublePlay.preExecuteUserEvent(BreakerEvent.MinusScore(8))
+          breakerDoublePlay.preExecuteUserEvent(BreakerEvent.MinusScore(2))
         }
         if(breakerDoublePlay.bricks.exists(_.position.y >= 340)){
           websocketClient.sendByteMsg(BreakerEvent.SendGameOver)
@@ -192,7 +193,8 @@ class GameHolder(canvasName:String) {
                   // FIXME myState有可能不存在
                   if(gameState == GameState.doublePlay && breakerSchemaImplOpt.isEmpty){
                     val myState: BreakerEvent.UserGameState = states.find(_.name == myName).get
-                    breakerSchemaImplOpt = Some(BreakerDoublePlay(ctx, bounds, canvasBoundary, myName, myState.shield, myState.pearl, myState.bricks))
+                    val otherState: BreakerEvent.UserGameState = states.find(_.name != myName).get
+                    breakerSchemaImplOpt = Some(BreakerDoublePlay(ctx, bounds, canvasBoundary, myName, otherState.name, myState.shield, myState.pearl, myState.bricks))
                     pageRender()
                   }
                   else if(gameState == GameState.doublePlay){
@@ -219,6 +221,15 @@ class GameHolder(canvasName:String) {
                 case BreakerEvent.GetGameOver(winner) =>
                   breakerSchemaImplOpt.foreach{
                     case breakerSchemaImpl: BreakerDoublePlay =>
+                      //FIXME 为了显示需要，otherBricks多画了一行
+                      breakerSchemaImpl.otherBricks.foreach{ brick =>
+                        brick.position = Point(brick.position.x, brick.position.y + brick.height)
+                      }
+                      val newBricks = (0 to 9).map{ cnt =>
+                        new BrickClient(Point(cnt * 80, 0), 1)
+                      }.toList
+                      if(winner != myName)breakerSchemaImpl.otherBricks = newBricks ::: breakerSchemaImpl.otherBricks
+
                       breakerSchemaImpl.winnerOpt = Some(winner)
 
                     case _ =>

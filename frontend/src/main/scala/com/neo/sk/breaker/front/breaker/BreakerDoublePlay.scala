@@ -20,6 +20,7 @@ case class BreakerDoublePlay(
   boundary: Point,
   canvasBoundary: Point,
   myName: String,
+  otherName: String,
   shieldPosition: Point,
   pearlPosition: Point,
   bricksPosition: List[Point]
@@ -30,7 +31,7 @@ case class BreakerDoublePlay(
   with DrawBricks{
 
   val myWindowView = Point(260, 25)
-  val otherWindowView = Point(50, 25)
+  val otherWindowView = Point(70, 25)
   val otherWindowScale = 0.2
 
   var gameScore: Int = 0
@@ -63,23 +64,43 @@ case class BreakerDoublePlay(
     drawScore()
 
     //FIXME 缩放
+    ctx.save()
     ctx.beginPath()
+    ctx.font = "15px arial"
+    ctx.textAlign = "left"
+    ctx.fillText(s"$otherName", otherWindowView.x, otherWindowView.y - 3)
     ctx.rect(otherWindowView.x, otherWindowView.y, boundary.x * otherWindowScale, boundary.y * otherWindowScale)
     ctx.stroke()
+    ctx.restore()
+    //红线
+    ctx.save()
+    ctx.beginPath()
+    ctx.moveTo(otherWindowView.x, otherWindowView.y + boundary.y * otherWindowScale * 19 / 25)
+    ctx.lineTo(otherWindowView.x + boundary.x  * otherWindowScale, otherWindowView.y + boundary.y  * otherWindowScale * 19 / 25)
+    ctx.strokeStyle = "red"
+    ctx.stroke()
+    ctx.restore()
 
     drawBricks(otherBricks, otherWindowScale, otherWindowView)
     drawOneShield(otherShield, otherWindowScale, otherWindowView)
     drawPearl(otherPearl, 0, otherWindowScale, otherWindowView)
 
+    ctx.save()
     ctx.beginPath()
+    ctx.font = "21px arial"
+    ctx.textAlign = "left"
+    ctx.fillText(s"$myName", myWindowView.x, myWindowView.y - 3)
     ctx.rect(myWindowView.x, myWindowView.y, boundary.x, boundary.y)
     ctx.stroke()
+    ctx.restore()
     //红线
+    ctx.save()
     ctx.beginPath()
     ctx.moveTo(myWindowView.x, myWindowView.y + boundary.y * 19 / 25)
     ctx.lineTo(myWindowView.x + boundary.x, myWindowView.y + boundary.y * 19 / 25)
     ctx.strokeStyle = "red"
     ctx.stroke()
+    ctx.restore()
 
     drawBricks(bricks, 1, myWindowView)
     drawOneShield(shield, 1, myWindowView)
@@ -89,8 +110,10 @@ case class BreakerDoublePlay(
 
     if(winnerOpt.nonEmpty){
       ctx.save()
-      ctx.clearRect(0, 0, canvasBoundary.x, canvasBoundary.y)
-      ctx.font = "40px Comic Sans Ms"
+      ctx.fillStyle = "rgba(0,0,0,0.4)"
+      ctx.fillRect(0, 0, canvasBoundary.x, canvasBoundary.y)
+      ctx.fillStyle = "rgba(0,0,0,1)"
+      ctx.font = "60px Comic Sans Ms"
       ctx.textAlign = "center"
       ctx.fillText(s"${winnerOpt.get} win!!", canvasBoundary.x / 2, canvasBoundary.y / 2)
       ctx.restore()
@@ -133,8 +156,10 @@ case class BreakerDoublePlay(
         pearl.speed = Point(pearl.speed.x, pearl.speed.y)
       case 1 =>
         pearl.speed = Point(pearl.speed.x, -pearl.speed.y)
+        if(rect.isInstanceOf[ShieldClient]) pearl.speed = Point(pearl.speed.x, -math.abs(pearl.speed.y))
       case 2 =>
         pearl.speed = Point(pearl.speed.x, -pearl.speed.y)
+        if(rect.isInstanceOf[ShieldClient]) pearl.speed = Point(pearl.speed.x, -math.abs(pearl.speed.y))
       case 3 =>
         pearl.speed = Point(-pearl.speed.x, pearl.speed.y)
       case 4 =>
@@ -210,7 +235,8 @@ case class BreakerDoublePlay(
         otherBricks = otherState.bricks.map(p => new BrickClient(p, 1))
         GameState.remain
       case ShieldMove(dir) =>
-        shield.changePosition(dir.toByte)
+        if(dir == 1 && shield.position.x > 1) shield.changePosition(1)
+        else if(dir == 2 && shield.position.x + shield.width < boundary.x - 1) shield.changePosition(2)
         GameState.remain
       case ShowEmoji(userName, t) =>
         emojiList = Emoji(userName, t, 50) :: emojiList

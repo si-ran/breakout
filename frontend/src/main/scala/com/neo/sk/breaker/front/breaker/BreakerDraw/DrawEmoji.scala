@@ -13,8 +13,15 @@ import org.scalajs.dom.html
 trait DrawEmoji { this: BreakerDoublePlay =>
 
   def drawEmojiList(): Unit ={
-    var cnt = 0
+    val emojiView: Point = Point(70, 135)
 
+//    ctx.save()
+//    ctx.beginPath()
+//    ctx.rect(emojiView.x, emojiView.y, 160, 420)
+//    ctx.stroke()
+//    ctx.restore()
+
+    var cnt = 0
     emojiList.take(3).foreach{ emoji =>
       cnt += 1
       val image = dom.document.createElement("img").asInstanceOf[html.Image]
@@ -22,9 +29,9 @@ trait DrawEmoji { this: BreakerDoublePlay =>
 //      image.setAttribute("src", s"/breaker/static/img/Menhera-${emoji.t}.png")
 
       ctx.save()
+      ctx.drawImage(image, emojiView.x + 15, 575 - 135 * cnt, 129.5, 112)
       ctx.font = "15px arial"
-      ctx.fillText(s"${emoji.user}", 50, 500 - 120 * cnt)
-      ctx.drawImage(image, 60, 515 - 120 * cnt, 111, 96)
+      ctx.fillText(s"${emoji.user}", emojiView.x + 5, 560 - 135 * cnt)
       ctx.restore()
     }
   }
