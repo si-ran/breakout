@@ -179,9 +179,6 @@ object UserActor {
             case userState: UserGameState =>
               roomActor ! RoomActor.UpdateStateFromFront(userState)
               Behaviors.same
-            case RoomLink =>
-              roomManager ! RoomManager.UserJoinRoom(userName, ctx.self)
-              Behaviors.same
             case SendEmoji(t) =>
               roomActor ! RoomActor.ShowEmoji(userName, t)
               Behaviors.same
@@ -205,7 +202,7 @@ object UserActor {
               Behaviors.same
             case GetGameOver(winner) =>
               dispatchTo(frontActor, GetGameOver(winner))
-              Behaviors.same
+              switchBehavior(ctx, "idle", idle(userName, frontActor))
             case _ =>
               Behaviors.same
           }
@@ -223,11 +220,7 @@ object UserActor {
         case StopGame(message) =>
           val state = GameStop(message)
           dispatchTo(frontActor, state)
-          Behaviors.same
-
-        case UserJoinRoomSuccess(newRoomActor, state) =>
-          dispatchTo(frontActor, state)
-          play(userName, frontActor, newRoomActor)
+          switchBehavior(ctx, "idle", idle(userName, frontActor))
 
         case UserAccord(state) =>
           dispatchTo(frontActor, state)

@@ -9,6 +9,8 @@ import com.neo.sk.breaker.shared.ptcl.protocol.BreakerEvent._
   */
 trait BreakerSchemaImplClient {
 
+  var renderControl: Int = 1 //用以切换画面状态（等待，读取等在GameHolder中可以直接渲染的内容）
+
   def drawGameByTime(offsetTime:Long): Unit ={}
 
   def logicUpdate(): Unit

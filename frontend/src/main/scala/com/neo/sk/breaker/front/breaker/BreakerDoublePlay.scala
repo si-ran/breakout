@@ -34,6 +34,7 @@ case class BreakerDoublePlay(
   val otherWindowScale = 0.2
 
   var gameScore: Int = 0
+  var winnerOpt: Option[String] = None
 
   case class Emoji(
     user: String,
@@ -73,12 +74,27 @@ case class BreakerDoublePlay(
     ctx.beginPath()
     ctx.rect(myWindowView.x, myWindowView.y, boundary.x, boundary.y)
     ctx.stroke()
+    //红线
+    ctx.beginPath()
+    ctx.moveTo(myWindowView.x, myWindowView.y + boundary.y * 19 / 25)
+    ctx.lineTo(myWindowView.x + boundary.x, myWindowView.y + boundary.y * 19 / 25)
+    ctx.strokeStyle = "red"
+    ctx.stroke()
 
     drawBricks(bricks, 1, myWindowView)
     drawOneShield(shield, 1, myWindowView)
     drawPearl(pearl, offsetTime, 1, myWindowView)
 
     ctx.restore()
+
+    if(winnerOpt.nonEmpty){
+      ctx.save()
+      ctx.clearRect(0, 0, canvasBoundary.x, canvasBoundary.y)
+      ctx.font = "40px Comic Sans Ms"
+      ctx.textAlign = "center"
+      ctx.fillText(s"${winnerOpt.get} win!!", canvasBoundary.x / 2, canvasBoundary.y / 2)
+      ctx.restore()
+    }
   }
 
   override def logicUpdate(): Unit ={

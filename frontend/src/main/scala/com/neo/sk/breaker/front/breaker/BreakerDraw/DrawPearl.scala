@@ -22,7 +22,21 @@ trait DrawPearl { this: BreakerDoublePlay =>
           case _ =>
             pearl.speed * offsetTime / 120.0f
         }
+      ctx.save()
       ctx.beginPath()
+      val grd = ctx.createRadialGradient(
+        (pearl.position.x + offsetPoint.x) * scale + offsetPosition.x,
+        (pearl.position.y + offsetPoint.y) * scale + offsetPosition.y,
+        pearl.radius * scale / 2,
+        (pearl.position.x + offsetPoint.x) * scale + offsetPosition.x,
+        (pearl.position.y + offsetPoint.y) * scale + offsetPosition.y,
+        pearl.radius * scale
+      )
+      grd.addColorStop(1, "#00bfff")
+      grd.addColorStop(0, "#7adeff")
+      ctx.fillStyle = grd
+      ctx.strokeStyle = "#00bfff"
+      ctx.lineWidth = 3
       ctx.arc(
         (pearl.position.x + offsetPoint.x) * scale + offsetPosition.x,
         (pearl.position.y + offsetPoint.y) * scale + offsetPosition.y,
@@ -31,6 +45,7 @@ trait DrawPearl { this: BreakerDoublePlay =>
         math.Pi * 2)
       ctx.stroke()
       ctx.fill()
+      ctx.restore()
     }
     else{
       ctx.save()

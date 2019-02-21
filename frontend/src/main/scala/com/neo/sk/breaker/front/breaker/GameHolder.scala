@@ -150,11 +150,11 @@ class GameHolder(canvasName:String) {
     breakerSchemaImplOpt.foreach {
       case breakerDoublePlay: BreakerDoublePlay =>
         websocketClient.sendByteMsg(breakerDoublePlay.getUserState)
-        if(breakerDoublePlay.gameScore >= 6){
+        if(breakerDoublePlay.gameScore >= 8){
           websocketClient.sendByteMsg(SendAddBricks)
-          breakerDoublePlay.preExecuteUserEvent(BreakerEvent.MinusScore(6))
+          breakerDoublePlay.preExecuteUserEvent(BreakerEvent.MinusScore(8))
         }
-        if(breakerDoublePlay.bricks.exists(_.position.y >= 420)){
+        if(breakerDoublePlay.bricks.exists(_.position.y >= 340)){
           websocketClient.sendByteMsg(BreakerEvent.SendGameOver)
         }
       case _ =>
@@ -217,9 +217,12 @@ class GameHolder(canvasName:String) {
                   }
 
                 case BreakerEvent.GetGameOver(winner) =>
-                  if(gameState == GameState.doublePlay){
-                    JsFunc.alert(s"winner is $winner")
-                    switchState(GameState.mainMenu)
+                  breakerSchemaImplOpt.foreach{
+                    case breakerSchemaImpl: BreakerDoublePlay =>
+                      breakerSchemaImpl.winnerOpt = Some(winner)
+
+                    case _ =>
+
                   }
 
                 case msg => println(s"接收到无效消息: $msg")
@@ -269,6 +272,15 @@ class GameHolder(canvasName:String) {
   def doubleActionListenEvent(): Unit ={
     canvas.focus()
     canvas.onclick = { e:MouseEvent =>
+      e.button match {
+        case 0 =>
+          if(breakerSchemaImplOpt.get.asInstanceOf[BreakerDoublePlay].winnerOpt.nonEmpty){
+            breakerSchemaImplOpt.get.asInstanceOf[BreakerDoublePlay].winnerOpt = None
+            switchState(GameState.mainMenu)
+          }
+        case _ =>
+          println("unknown")
+      }
       e.preventDefault()
     }
     canvas.onkeypress = { e:KeyboardEvent =>
