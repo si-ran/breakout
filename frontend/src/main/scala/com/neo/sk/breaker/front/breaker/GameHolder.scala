@@ -85,7 +85,7 @@ class GameHolder(canvasName:String) {
       case GameState.doublePlay =>
         //FIXME 连接前判断是否已经连接
         breakerSchemaImplOpt = None
-        websocketClient.sendTextMsg("link")
+        websocketClient.sendByteMsg(BreakerEvent.RoomLink)
       case _ =>
     }
     addActionListenEvent()

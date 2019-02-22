@@ -116,7 +116,7 @@ object RoomManager {
             Behaviors.same
           }
           else if(userMap.nonEmpty){
-            val roomId = roomMap.keys.toArray.sorted.foldLeft(0)((a, b) => if(a + 1 >= b) b else a)
+            val roomId = roomMap.keys.toArray.sorted.foldLeft(0)((a, b) => if(a + 1 >= b) b else a) + 1
             val roomActor = getRoomActor(ctx, roomId)
             val userActor = replyToUserActor
             val otherUser = userMap.head

@@ -132,8 +132,6 @@ object UserManager {
       case TextMessage.Strict(tm) =>
         println(s"$tm , ws get TextMessage")
         tm match{
-          case "link" =>
-            UserActor.WsMessage(RoomLink)
           case _ =>
             UserActor.WsMessage(EmptyFrontEvent)
         }
