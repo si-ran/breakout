@@ -117,7 +117,7 @@ object UserActor {
             switchBehavior(ctx, "idle", idle(name, frontActor))
 
           case unknownMsg =>
-            println(s"init unknown msg : $unknownMsg")
+            log.info(s"init unknown msg : $unknownMsg")
             Behaviors.same
         }
       }
@@ -157,7 +157,7 @@ object UserActor {
           Behaviors.stopped
 
         case unknownMsg =>
-          println(s"idle unknown msg : $unknownMsg")
+          log.info(s"idle unknown msg : $unknownMsg")
           Behaviors.same
       }
     }
@@ -233,7 +233,7 @@ object UserActor {
           Behaviors.same
 
         case unknownMsg =>
-          println(s"play unknown msg : $unknownMsg")
+          log.info(s"play unknown msg : $unknownMsg")
           Behaviors.same
       }
     }
