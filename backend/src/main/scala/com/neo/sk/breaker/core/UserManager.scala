@@ -1,5 +1,7 @@
 package com.neo.sk.breaker.core
 
+import java.util.concurrent.atomic.AtomicInteger
+
 import org.slf4j.LoggerFactory
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors, StashBuffer, TimerScheduler}
@@ -73,7 +75,7 @@ object UserManager {
 
         case TimeOut(m) =>
           log.debug(s"${ctx.self.path} is time out when busy, msg=$m")
-          switchBehavior(ctx, "idle", idle())
+          switchBehavior(ctx, "init", init())
 
         case x =>
           stashBuffer.stash(x)
@@ -87,18 +89,21 @@ object UserManager {
       log.info(s"userManager is starting...")
       implicit val stashBuffer: StashBuffer[Command] = StashBuffer[Command](Int.MaxValue)
       Behaviors.withTimers[Command] { implicit timer =>
-        switchBehavior(ctx, "idle", idle())
+        val idSerialNumGenerator = new AtomicInteger(0)
+        switchBehavior(ctx, "idle", idle(idSerialNumGenerator))
       }
     }
 
-  private def idle()(
+  private def idle(
+    idSerial: AtomicInteger
+  )(
     implicit stashBuffer: StashBuffer[Command],
     timer: TimerScheduler[Command]
   ): Behavior[Command] ={
     Behaviors.receive[Command]{(ctx, msg) =>
       msg match {
         case GameJoin(name, replyTo) =>
-          val userActor = getUserActor(ctx, name)
+          val userActor = getUserActor(ctx, idSerial.getAndIncrement().toString, name)
           replyTo ! socketOk(userActor)
           Behaviors.same
 
@@ -147,8 +152,8 @@ object UserManager {
   }
 
 
-  private def getUserActor(ctx: ActorContext[Command], name: String): ActorRef[UserActor.Command] = {
-    val childName = s"UserActor-$name"
+  private def getUserActor(ctx: ActorContext[Command], id: String, name: String): ActorRef[UserActor.Command] = {
+    val childName = s"UserActor-$id"
     ctx.child(childName).getOrElse {
       val actor = ctx.spawn(UserActor.init(name), childName)
       ctx.watchWith(actor, ChildDead(childName, actor))
