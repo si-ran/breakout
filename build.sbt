@@ -80,9 +80,9 @@ lazy val backend = (project in file("backend")).enablePlugins(PackPlugin)
     // If you need to specify main classes manually, use packSettings and packMain
     //packSettings,
     // [Optional] Creating `hello` command that calls org.mydomain.Hello#main(Array[String])
-    packMain := Map("thor" -> projectMainClass),
-    packJvmOpts := Map("thor" -> Seq("-Xmx512m", "-Xms64m")),
-    packExtraClasspath := Map("thor" -> Seq("."))
+    packMain := Map("breakout" -> projectMainClass),
+    packJvmOpts := Map("breakout" -> Seq("-Xmx512m", "-Xms64m")),
+    packExtraClasspath := Map("breakout" -> Seq("."))
   )
   .settings(
     libraryDependencies ++= Dependencies.backendDependencies
