@@ -24,4 +24,9 @@ package object protocol {
     msg: String = "ok"
   ) extends CommonRsp
 
+  case class ComRsp(
+    errCode: Int,
+    msg: String
+  ) extends CommonRsp
+
 }

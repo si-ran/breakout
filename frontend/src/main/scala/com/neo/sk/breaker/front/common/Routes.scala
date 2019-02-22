@@ -20,6 +20,8 @@ object Routes {
 
     def adminLogin: String = base + "/adminLogin"
 
+    def signUp: String = base + "/signUp"
+
   }
 
   object Admin{
@@ -27,6 +29,10 @@ object Routes {
     val base: String = baseUrl + "/admin"
 
     def getStatics: String = base + "/getStatics"
+
+    def getUserInfo: String = base + "/getUserInfo"
+
+    def banUser: String = base + "/banUser"
 
   }
 

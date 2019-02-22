@@ -3,10 +3,12 @@ package com.neo.sk.breaker.http
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 import com.neo.sk.breaker.common.AppSettings
-import com.neo.sk.breaker.models.dao.LoginDAO
+import com.neo.sk.breaker.models.dao.UserInfoDAO
+import com.neo.sk.breaker.shared.ptcl.protocol.{ErrorRsp, SuccessRsp}
 import com.neo.sk.breaker.shared.ptcl.protocol.LoginProtocol._
 import org.slf4j.LoggerFactory
 
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 /**
@@ -24,11 +26,12 @@ trait LoginService extends ServiceUtils with BaseService {
     entity(as[Either[Error, LoginReq]]) {
       case Right(req) =>
         dealFutureResult(
-          LoginDAO.userLogin(req.account).map{
-            case Some((name, password)) =>
-              if(req.password == password){
+          UserInfoDAO.userLogin(req.account).map{
+            case Some((name, password, isBan)) =>
+              if(req.password == password && !isBan){
                 complete(LoginUserRsp(name))
               }
+              else if(isBan) complete(LoginUserRsp("error", 10003, "账号已禁用"))
               else complete(LoginUserRsp("error", 10002, "密码不正确"))
             case None =>
               complete(LoginUserRsp("error", 10001, "账号不存在"))
@@ -57,8 +60,28 @@ trait LoginService extends ServiceUtils with BaseService {
     }
   }
 
+  private val signUp: Route = (path("signUp") & post){
+    entity(as[Either[Error, SignUpReq]]) {
+      case Right(req) =>
+        dealFutureResult(
+          UserInfoDAO.getOneInfo(req.account).flatMap{
+            case Some(_) =>
+              Future(complete(ErrorRsp(40001, "账号已存在")))
+            case None =>
+              UserInfoDAO.SignUp(req.name, req.account, req.password).map{
+                case 0 => complete(ErrorRsp(40002, "注册失败"))
+                case _ => complete(SuccessRsp())
+              }
+          }
+        )
+
+      case Left(e) =>
+        complete(s"data parse error: $e")
+    }
+  }
+
   val loginRoutes: Route = pathPrefix("login") {
-    userLogin ~ adminLogin
+    userLogin ~ adminLogin ~ signUp
   }
 
 }

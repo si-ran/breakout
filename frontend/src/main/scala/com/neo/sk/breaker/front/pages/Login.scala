@@ -3,7 +3,8 @@ package com.neo.sk.breaker.front.pages
 import com.neo.sk.breaker.front.common.Page
 import com.neo.sk.breaker.front.utils.{Http, JsFunc}
 import com.neo.sk.breaker.front.common.Routes
-import com.neo.sk.breaker.shared.ptcl.protocol.LoginProtocol.{LoginReq, LoginUserRsp}
+import com.neo.sk.breaker.shared.ptcl.protocol.LoginProtocol.{LoginReq, LoginUserRsp, SignUpReq}
+import com.neo.sk.breaker.shared.ptcl.protocol.{ComRsp, CommonRsp, ErrorRsp, SuccessRsp}
 import mhtml.{Rx, Var}
 import org.scalajs.dom
 import io.circe.generic.auto._
@@ -20,7 +21,22 @@ import scala.concurrent.ExecutionContext.Implicits.global
   */
 object Login extends Page{
 
-  val fromContentFlag = Var(2)
+  val fromContentFlag = Var(3)
+
+  def signUp(): Unit = {
+    val name = dom.document.getElementById("userName").asInstanceOf[Input].value
+    val account = dom.document.getElementById("userAccount").asInstanceOf[Input].value
+    val password = dom.document.getElementById("userPassword").asInstanceOf[Input].value
+    val rePassword = dom.document.getElementById("userPasswordReEnter").asInstanceOf[Input].value
+
+    Http.postJsonAndParse[ComRsp](Routes.Login.signUp, SignUpReq(name, account, password).asJson.noSpaces).map {
+      case ComRsp(0, "ok") =>
+        JsFunc.alert("注册成功")
+      case ComRsp(errCode, msg) =>
+        JsFunc.alert(s"$msg")
+
+    }
+  }
 
   def userLogin():Unit ={
     val account = dom.document.getElementById("loginAccount").asInstanceOf[Input].value
@@ -28,6 +44,7 @@ object Login extends Page{
 
     Http.postJsonAndParse[LoginUserRsp](Routes.Login.userLogin, LoginReq(account, password).asJson.noSpaces).map{
       case LoginUserRsp(name, 0, "ok") =>
+        dom.window.localStorage.setItem("user", s"$name")
         dom.window.location.hash = s"/play/$name"
       case LoginUserRsp(_, errCode, msg) =>
         JsFunc.alert(s"$msg")
@@ -46,6 +63,15 @@ object Login extends Page{
     }
   }
 
+  def guestLogin(): Unit ={
+    val nickname = dom.document.getElementById("nickname").asInstanceOf[Input].value
+    if(nickname.nonEmpty){
+      dom.window.localStorage.setItem("user", s"guest-${System.currentTimeMillis() % 10000}-$nickname")
+      dom.window.location.hash = s"/play/guest-${System.currentTimeMillis() % 10000}-$nickname"
+    }
+    else JsFunc.alert("error: nickname is none")
+  }
+
   val fromContent: Rx[Elem] = fromContentFlag.map{
     case 0 =>
       <section class="signUpFrom">
@@ -53,7 +79,8 @@ object Login extends Page{
           <h2>注册</h2>
         </div>
         <div class="form-content">
-          <input class="form-control" id="userEmail" placeholder="userAccount"></input>
+          <input class="form-control" id="userName" placeholder="userName"></input>
+          <input class="form-control" id="userAccount" placeholder="userAccount"></input>
           <input type="password" class="form-control" id="userPassword" placeholder="password"></input>
           <input type="password" class="form-control" id="userPasswordReEnter" placeholder="re_enter password"></input>
         </div>
@@ -77,10 +104,10 @@ object Login extends Page{
         </div>
         <div class="form-submit">
           <button class="btn" onclick={()=> userLogin()}>登录</button>
-          <button class="btn" onclick={()=> dom.window.location.hash = s"/play/${System.currentTimeMillis()}"}>游客登录</button>
         </div>
         <div class="form-tip">
           <span>如果你还没有邮箱账号 <a onclick={()=> fromContentFlag := 0} style="cursor:pointer;">点击这里</a></span>
+          <span style="display: block;">或者以游客身份登录 <a onclick={()=> fromContentFlag := 3} style="cursor:pointer;">点击这里</a></span>
         </div>
         <div class="form-information">
         </div>
@@ -95,7 +122,23 @@ object Login extends Page{
           <input type="password" class="form-control" id="loginPassword" placeholder="password"></input>
         </div>
         <div class="form-submit">
-          <button class="btn" onclick={()=> }>登录</button>
+          <button class="btn" onclick={()=> adminLogin()}>登录</button>
+        </div>
+        <div class="form-tip">
+        </div>
+        <div class="form-information">
+        </div>
+      </section>
+    case 3 =>
+      <section class="signUpFrom">
+        <div class="form-title">
+          <h2>游客登录</h2>
+        </div>
+        <div class="form-content">
+          <input class="form-control" id="nickname" placeholder="userNickname"></input>
+        </div>
+        <div class="form-submit">
+          <button class="btn" onclick={()=> guestLogin()}>游客登录</button>
         </div>
         <div class="form-tip">
         </div>
@@ -116,6 +159,9 @@ object Login extends Page{
           </li>
           <li class="nav-item">
             <a class={if(flag == 2) "nav-link active" else "nav-link"} onclick={()=> fromContentFlag := 2}>管理</a>
+          </li>
+          <li class="nav-item">
+            <a class={if(flag == 3) "nav-link active" else "nav-link"} onclick={()=> fromContentFlag := 3}>游客</a>
           </li>
         </ul>
       </div>

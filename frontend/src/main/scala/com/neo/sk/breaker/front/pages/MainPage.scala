@@ -15,7 +15,7 @@ object MainPage extends PageSwitcher {
     case "login" :: Nil => Login.render
     case "admin" :: Nil => Admin.render
     case "play" :: name :: Nil => new CanvasRender(name).render
-    case _ => <div>Error And Page</div>
+    case _ => Login.render
   }
 
 

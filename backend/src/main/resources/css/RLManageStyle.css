@@ -43,6 +43,7 @@
 .RLTable #RLBotListGetButton{
     background-color: #337ab7;
     border-color: #337ab7;
+    margin: 0px 25px;
     padding: 5px 10px;
     width: 70px;
     font-size: 12px;

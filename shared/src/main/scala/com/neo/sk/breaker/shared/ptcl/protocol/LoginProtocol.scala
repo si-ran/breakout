@@ -12,6 +12,12 @@ object LoginProtocol {
     password: String
   ) extends CommonReq
 
+  final case class SignUpReq(
+    name: String,
+    account: String,
+    password: String
+  ) extends CommonReq
+
   final case class LoginUserRsp(
     userName: String,
     errCode: Int = 0,

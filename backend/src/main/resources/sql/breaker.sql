@@ -6,6 +6,8 @@ CREATE TABLE user_info (
   id                BIGINT PRIMARY KEY DEFAULT nextval('user_info_id_seq'),
   user_name         VARCHAR(63)    NOT NULL,
   account           VARCHAR(127)   NOT NULL,
-  password          VARCHAR(127)   NOT NULL
+  password          VARCHAR(127)   NOT NULL,
+  ban               BOOLEAN        NOT NULL,
+  win               INT            NOT NULL
 );
-ALTER SEQUENCE game_server_info_id_seq OWNED BY game_server_info.id;
+ALTER SEQUENCE user_info_id_seq OWNED BY user_info.id;

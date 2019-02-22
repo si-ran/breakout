@@ -7,6 +7,10 @@ package com.neo.sk.breaker.shared.ptcl.protocol
   */
 object AdminProtocol {
 
+  case class BanUserReq(
+    name: String
+  ) extends CommonReq
+
   case class RoomStatics(
     id: Int,
     user1: String,
@@ -17,6 +21,18 @@ object AdminProtocol {
     roomStatics: List[RoomStatics],
     errCode: Int = 0,
     msg: String = "ok"
+  ) extends CommonRsp
+
+  case class OneUserStatic(
+    name: String,
+    win: Int,
+    isBan: Boolean
   )
+
+  final case class UserStaticsRsp(
+    userStatics: List[OneUserStatic],
+    errCode: Int = 0,
+    msg: String = "ok"
+  ) extends CommonRsp
 
 }

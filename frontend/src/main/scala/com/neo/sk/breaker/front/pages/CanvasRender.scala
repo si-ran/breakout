@@ -19,8 +19,13 @@ class CanvasRender(name: String) extends Page{
   private val canvas = <canvas id ="GameView" tabindex="1"></canvas>
 
   def init(): Unit = {
-    val gameHolder = new GameHolder("GameView")
-    gameHolder.start(name)
+    if(dom.window.localStorage.getItem("user") == null){
+      dom.window.location.hash = "/login"
+    }
+    else{
+      val gameHolder = new GameHolder("GameView")
+      gameHolder.start(dom.window.localStorage.getItem("user"))
+    }
 
   }
 
