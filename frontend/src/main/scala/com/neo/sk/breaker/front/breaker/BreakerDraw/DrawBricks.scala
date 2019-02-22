@@ -17,7 +17,7 @@ import scala.collection.immutable
 trait DrawBricks { this: BreakerDoublePlay =>
 
   val brickImages: immutable.IndexedSeq[Image] = (0 to 5).map(_ => dom.document.createElement("img").asInstanceOf[html.Image])
-  (0 to 5).foreach(cnt => brickImages(cnt).setAttribute("src", s"/breaker/static/img/brick-${cnt + 1}.png"))
+  (0 to 5).foreach(cnt => brickImages(cnt).setAttribute("src", s"/breakoutSIRAN/static/img/brick-${cnt + 1}.png"))
 
   def drawBricks(bricks: List[BrickClient], scale: Double, offsetPosition: Point): Unit ={
     bricks.foreach(brick =>

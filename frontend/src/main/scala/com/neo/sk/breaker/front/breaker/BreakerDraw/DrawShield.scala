@@ -14,7 +14,7 @@ import org.scalajs.dom.html
 trait DrawShield { this: BreakerDoublePlay =>
 
   val shieldImg = dom.document.createElement("img").asInstanceOf[html.Image]
-  shieldImg.setAttribute("src", s"/breaker/static/img/shield.png")
+  shieldImg.setAttribute("src", s"/breakoutSIRAN/static/img/shield.png")
 
   def drawOneShield(shield: ShieldClient, scale: Double, offsetPosition: Point): Unit ={
 //    val finalPosition = shield.position * scale.toFloat + offsetPosition

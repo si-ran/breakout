@@ -26,7 +26,7 @@ trait DrawOthers { this: BreakerDoublePlay =>
       cnt += 1
       val image = dom.document.createElement("img").asInstanceOf[html.Image]
 //      image.setAttribute("src", s"/breaker/static/img/emoji-${emoji.t}.png")
-      image.setAttribute("src", s"/breaker/static/img/Menhera-${emoji.t}.png")
+      image.setAttribute("src", s"/breakoutSIRAN/static/img/Menhera-${emoji.t}.png")
 
       ctx.save()
       ctx.drawImage(image, emojiView.x + 15, 575 - 135 * cnt, 129.5, 112)

@@ -42,7 +42,7 @@ trait HttpService
 
   val routes: Route =
     ignoreTrailingSlash {
-      pathPrefix("breaker") {
+      pathPrefix("breakoutSIRAN") {
         pathEndOrSingleSlash {
           getFromResource("html/admin.html")
         } ~ resourceRoutes ~ wsRoutes ~ loginRoutes ~ adminRoutes

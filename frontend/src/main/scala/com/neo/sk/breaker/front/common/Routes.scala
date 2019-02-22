@@ -8,7 +8,7 @@ package com.neo.sk.breaker.front.common
 object Routes {
 
 
-  val baseUrl = "/breaker"
+  val baseUrl = "/breakoutSIRAN"
 
   def wsJoinGameUrl(name:String): String = baseUrl + s"/gameJoin?name=$name"
 
