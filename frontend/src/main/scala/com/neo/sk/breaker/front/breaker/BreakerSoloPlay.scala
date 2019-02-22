@@ -1,5 +1,6 @@
 package com.neo.sk.breaker.front.breaker
 
+import com.neo.sk.breaker.front.breaker.BreakerDraw.{DrawBricks, DrawOthers, DrawPearl, DrawShield}
 import com.neo.sk.breaker.shared.ptcl.Constants.GameState
 import com.neo.sk.breaker.shared.ptcl.breaker._
 import com.neo.sk.breaker.shared.ptcl.component.RectangleOfBreaker

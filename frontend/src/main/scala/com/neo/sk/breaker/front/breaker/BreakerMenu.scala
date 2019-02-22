@@ -29,7 +29,7 @@ class BreakerMenu(
     ctx.font = "30px Wawati SC"
     ctx.rect(canvasBoundary.x / 2 - 80, canvasBoundary.y / 3 - 40, 160, 60)
     ctx.stroke()
-    ctx.fillText("单人游戏", canvasBoundary.x / 2, canvasBoundary.y / 3)
+    ctx.fillText("双人游戏", canvasBoundary.x / 2, canvasBoundary.y / 3)
 
     ctx.rect(canvasBoundary.x / 2 - 80, canvasBoundary.y * 2 / 3 - 40, 160, 60)
     ctx.stroke()
@@ -44,7 +44,7 @@ class BreakerMenu(
   override def instantExecuteUserEvent(event: GamePlayEvent): Int = {
     event match {
       case MouseClick(x, y) =>
-        if(x > canvasBoundary.x / 2 - 80 && x < canvasBoundary.x / 2 + 80 && y > canvasBoundary.y / 3 - 30 && y < canvasBoundary.y / 3 + 30) GameState.soloPlay
+        if(x > canvasBoundary.x / 2 - 80 && x < canvasBoundary.x / 2 + 80 && y > canvasBoundary.y / 3 - 30 && y < canvasBoundary.y / 3 + 30) GameState.doublePlay
         else if(x > canvasBoundary.x / 2 - 80 && x < canvasBoundary.x / 2 + 80 && y > canvasBoundary.y * 2 / 3 - 30 && y < canvasBoundary.y * 2 / 3 + 30) GameState.doublePlay
         else GameState.mainMenu
       case _ =>

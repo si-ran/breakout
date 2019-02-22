@@ -39,6 +39,13 @@ case class BreakerDoublePlay(
   var gameSkillValue: Int = 0
   var winnerOpt: Option[String] = None
 
+  case class BlowBrick(
+    brick: BrickClient,
+    var speed: Point,
+    var time: Int
+  )
+  var blowBrickList: List[BlowBrick] = Nil
+
   case class Emoji(
     user: String,
     t: Byte,
@@ -69,23 +76,7 @@ case class BreakerDoublePlay(
     drawEmojiList()
     drawSkillValue()
 
-    //FIXME 缩放
-    ctx.save()
-    ctx.beginPath()
-    ctx.font = "15px arial"
-    ctx.textAlign = "left"
-    ctx.fillText(s"$otherName", otherWindowView.x, otherWindowView.y - 3)
-    ctx.rect(otherWindowView.x, otherWindowView.y, boundary.x * otherWindowScale, boundary.y * otherWindowScale)
-    ctx.stroke()
-    ctx.restore()
-    //红线
-    ctx.save()
-    ctx.beginPath()
-    ctx.moveTo(otherWindowView.x, otherWindowView.y + boundary.y * otherWindowScale * 19 / 25)
-    ctx.lineTo(otherWindowView.x + boundary.x  * otherWindowScale, otherWindowView.y + boundary.y  * otherWindowScale * 19 / 25)
-    ctx.strokeStyle = "red"
-    ctx.stroke()
-    ctx.restore()
+    drawBorder(otherName, otherWindowScale, otherWindowView)
 
     drawEnergy(otherGameEnergy, otherWindowView, otherWindowScale)
 
@@ -94,22 +85,7 @@ case class BreakerDoublePlay(
     drawPearl(otherPearl, 0, otherWindowScale, otherWindowView, isLast = false)
     if(drawShotTime > 0) drawShot()
 
-    ctx.save()
-    ctx.beginPath()
-    ctx.font = "21px arial"
-    ctx.textAlign = "left"
-    ctx.fillText(s"$myName", myWindowView.x, myWindowView.y - 3)
-    ctx.rect(myWindowView.x, myWindowView.y, boundary.x, boundary.y)
-    ctx.stroke()
-    ctx.restore()
-    //红线
-    ctx.save()
-    ctx.beginPath()
-    ctx.moveTo(myWindowView.x, myWindowView.y + boundary.y * 19 / 25)
-    ctx.lineTo(myWindowView.x + boundary.x, myWindowView.y + boundary.y * 19 / 25)
-    ctx.strokeStyle = "red"
-    ctx.stroke()
-    ctx.restore()
+    drawBorder(myName, 1, myWindowView)
 
     drawEnergy(gameEnergy, myWindowView, 1)
 
@@ -117,6 +93,7 @@ case class BreakerDoublePlay(
     drawOneShield(shield, 1, myWindowView)
     drawPearl(pearl, offsetTime, 1, myWindowView, isLast = true)
     shotPearls.foreach(drawPearl(_, offsetTime, 1, myWindowView, isLast = false))
+    drawBricksBlow(blowBrickList, 1, myWindowView)
 
     ctx.restore()
 
@@ -185,10 +162,12 @@ case class BreakerDoublePlay(
 
   def updatePearlSpeed(): Unit ={
 
+    //主体球判断
     pearlChangeSpeed(shield)
     bricks.foreach{ brick =>
       if (pearl.collided(brick) != 0) {
         bricks = bricks.filterNot(t => t == brick)
+        blowBrickList = BlowBrick(new BrickClient(brick.position, brick.color), Point(2,1), 40) :: BlowBrick(new BrickClient(brick.position, brick.color), Point(-2,1), 40) :: blowBrickList
         gameEnergy += 1
         gameSkillValue += 1
       }
@@ -196,10 +175,12 @@ case class BreakerDoublePlay(
     }
     //散弹判断
     shotPearls.foreach{ shotPearl =>
-      var isCollied = false
+      var isCollied = false //避免重复碰撞
+      if(!(shotPearl.position > Point(0, 0) && shotPearl.position < boundary)) shotPearls = shotPearls.filterNot(_ == shotPearl)
       bricks.foreach{ brick =>
         if (shotPearl.collided(brick) != 0 && !isCollied) {
           bricks = bricks.filterNot(t => t == brick)
+          blowBrickList = BlowBrick(new BrickClient(brick.position, brick.color), Point(2,1), 40) :: BlowBrick(new BrickClient(brick.position, brick.color), Point(-2,1), 40) :: blowBrickList
           gameEnergy += 1
           gameSkillValue += 1
           isCollied = true
@@ -223,6 +204,7 @@ case class BreakerDoublePlay(
     }
     if(pearl.position.y >= boundary.y - pearl.radius) {
       pearl.isShow = false
+      shotPearls = Nil
       pearl.position = Point(10, 410)
       pearl.speed = Point(20, -20)
       pearlShowTime = 50
@@ -284,7 +266,7 @@ case class BreakerDoublePlay(
         else if(dir == 2 && shield.position.x + shield.width < boundary.x - 1) shield.changePosition(2)
         GameState.remain
       case ShowEmoji(userName, t) =>
-        emojiList = Emoji(userName, t, 50) :: emojiList
+        emojiList = Emoji(userName, t, 40) :: emojiList
         GameState.remain
       case _ =>
         GameState.remain

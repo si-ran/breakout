@@ -5,6 +5,8 @@ import com.neo.sk.breaker.shared.ptcl.model.Point
 import org.scalajs.dom
 import org.scalajs.dom.html
 
+import scala.reflect.internal.util.OffsetPosition
+
 /**
   * User: XuSiRan
   * Date: 2019/2/18
@@ -12,8 +14,29 @@ import org.scalajs.dom.html
   */
 trait DrawOthers { this: BreakerDoublePlay =>
 
+  def drawBorder(name: String, scale: Double, offsetPosition: Point): Unit ={
+    val fontSize = if(name == myName) "21px" else "15px"
+
+    ctx.save()
+    ctx.beginPath()
+    ctx.font = s"$fontSize arial"
+    ctx.textAlign = "left"
+    ctx.fillText(s"$name", offsetPosition.x, offsetPosition.y - 3)
+    ctx.rect(offsetPosition.x, offsetPosition.y, boundary.x * scale, boundary.y * scale)
+    ctx.stroke()
+    ctx.restore()
+    //红线
+    ctx.save()
+    ctx.beginPath()
+    ctx.moveTo(offsetPosition.x, offsetPosition.y + boundary.y * scale * 19 / 25)
+    ctx.lineTo(offsetPosition.x + boundary.x  * scale, offsetPosition.y + boundary.y  * scale * 19 / 25)
+    ctx.strokeStyle = "red"
+    ctx.stroke()
+    ctx.restore()
+  }
+
   def drawEmojiList(): Unit ={
-    val emojiView: Point = Point(70, 135)
+    val emojiView: Point = Point(50, 135)
 
 //    ctx.save()
 //    ctx.beginPath()
@@ -31,7 +54,7 @@ trait DrawOthers { this: BreakerDoublePlay =>
       ctx.save()
       ctx.drawImage(image, emojiView.x + 15, 575 - 135 * cnt, 129.5, 112)
       ctx.font = "15px arial"
-      ctx.fillText(s"${emoji.user}", emojiView.x + 5, 570 - 135 * cnt)
+      ctx.fillText(s"${emoji.user} 发送表情：", emojiView.x + 5, 570 - 135 * cnt)
       ctx.restore()
     }
   }
