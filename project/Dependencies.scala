@@ -68,6 +68,7 @@ object Dependencies {
   val ehcache = "net.sf.ehcache" % "ehcache" % "2.10.4"
   val essf = "org.seekloud" %% "essf" % "0.0.1-beta1"
   val byteobject = "org.seekloud" %% "byteobject" % "0.1.2"
+  val h2Database = "com.h2database" % "h2" % "1.4.196"
 
 
 
@@ -92,7 +93,8 @@ object Dependencies {
       Dependencies.asynchttpclient,
       Dependencies.ehcache,
       Dependencies.essf,
-      Dependencies.byteobject
+      Dependencies.byteobject,
+      Dependencies.h2Database
     )
 
 

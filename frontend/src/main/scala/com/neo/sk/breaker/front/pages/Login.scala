@@ -85,7 +85,7 @@ object Login extends Page{
           <input type="password" class="form-control" id="userPasswordReEnter" placeholder="re_enter password"></input>
         </div>
         <div class="form-submit">
-          <button class="btn" onclick={()=> }>注册</button>
+          <button class="btn" onclick={()=> signUp()}>注册</button>
         </div>
         <div class="form-tip">
           <span>如果你已经注册过了 <a onclick={()=> fromContentFlag := 1} style="cursor:pointer;">点击这里</a></span>
@@ -106,7 +106,7 @@ object Login extends Page{
           <button class="btn" onclick={()=> userLogin()}>登录</button>
         </div>
         <div class="form-tip">
-          <span>如果你还没有邮箱账号 <a onclick={()=> fromContentFlag := 0} style="cursor:pointer;">点击这里</a></span>
+          <span>如果你还没有账号 <a onclick={()=> fromContentFlag := 0} style="cursor:pointer;">点击这里</a></span>
           <span style="display: block;">或者以游客身份登录 <a onclick={()=> fromContentFlag := 3} style="cursor:pointer;">点击这里</a></span>
         </div>
         <div class="form-information">

@@ -36,7 +36,7 @@ trait AdminService extends ServiceUtils with BaseService {
   private val getUserInfo : Route = (path("getUserInfo") & get){
     dealFutureResult(
       UserInfoDAO.allInfo().map{ userInfos =>
-        complete(UserStaticsRsp(userInfos.map(t => OneUserStatic(t.userName, t.win, t.ban)).toList))
+        complete(UserStaticsRsp(userInfos.map(t => OneUserStatic(t.name, t.win, t.isBan)).toList))
       }
     )
   }

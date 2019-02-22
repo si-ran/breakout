@@ -31,7 +31,7 @@ trait DrawOthers { this: BreakerDoublePlay =>
       ctx.save()
       ctx.drawImage(image, emojiView.x + 15, 575 - 135 * cnt, 129.5, 112)
       ctx.font = "15px arial"
-      ctx.fillText(s"${emoji.user}", emojiView.x + 5, 560 - 135 * cnt)
+      ctx.fillText(s"${emoji.user}", emojiView.x + 5, 570 - 135 * cnt)
       ctx.restore()
     }
   }

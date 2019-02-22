@@ -31,8 +31,8 @@ case class BreakerDoublePlay(
   with DrawBricks{
 
   val myWindowView = Point(260, 25)
-  val otherWindowView = Point(70, 25)
-  val otherWindowScale = 0.2
+  val otherWindowView = Point(30, 25)
+  val otherWindowScale = 0.25
 
   var gameEnergy: Int = 0
   var otherGameEnergy: Int = 0
