@@ -141,9 +141,12 @@ class GameHolder(canvasName:String) {
       ctx.font = "40px Comic Sans Ms"
       ctx.textAlign = "center"
       ctx.fillText("find player...", canvas.width / 2, canvas.height / 2)
+      ctx.font = "30px Comic Sans Ms"
+      ctx.fillText(s"Refresh if you couldn't find player after 20s", canvas.width / 2, canvas.height * 2 / 3)
       ctx.restore()
     }
     else breakerSchemaImplOpt.foreach(_.drawGameByTime(offsetTime))
+
 
     nextFrameDouble = dom.window.requestAnimationFrame(doubleGameRender())
   }

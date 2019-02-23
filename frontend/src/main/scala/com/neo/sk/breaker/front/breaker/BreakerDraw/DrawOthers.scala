@@ -91,4 +91,15 @@ trait DrawOthers { this: BreakerDoublePlay =>
     drawShotTime -= 1
   }
 
+  //画提示文字
+  def drawText(point: Point) ={
+    ctx.save()
+    ctx.beginPath()
+    ctx.font = "bold 30px Comic Sans Ms"
+    ctx.textAlign = "center"
+    ctx.fillStyle = "rgba(242, 141, 105, 0.8)"
+    ctx.fillText("对方给你加了一层方块", point.x, point.y)
+    ctx.restore()
+  }
+
 }

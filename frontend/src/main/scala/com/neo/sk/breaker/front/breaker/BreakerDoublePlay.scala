@@ -56,6 +56,7 @@ case class BreakerDoublePlay(
   var drawShotTime: Int = 0
   var isPearlTrans: Byte = 0 // pearl水平移动
   var isAddBricks: Boolean = false
+  var addBricksTime: Int = 0
   var isStateUpdate: Option[GameStateUpdate] = None
 
   var shield = new ShieldClient(shieldPosition)
@@ -94,6 +95,11 @@ case class BreakerDoublePlay(
     drawPearl(pearl, offsetTime, 1, myWindowView, isLast = true)
     shotPearls.foreach(drawPearl(_, offsetTime, 1, myWindowView, isLast = false))
     drawBricksBlow(blowBrickList, 1, myWindowView)
+
+    if(addBricksTime > 0){
+      drawText(myWindowView + Point(boundary.x / 2, 50))
+      addBricksTime -= 1
+    }
 
     ctx.restore()
 
@@ -244,6 +250,7 @@ case class BreakerDoublePlay(
         isPearlTrans = dir
       case AddBricks =>
         isAddBricks = true
+        addBricksTime = 120
       case MinusScore(score) =>
         gameEnergy -= score
       case ShotGun =>
