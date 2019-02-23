@@ -24,7 +24,7 @@ class CanvasRender(name: String) extends Page{
     }
     else{
       val gameHolder = new GameHolder("GameView")
-      gameHolder.start(dom.window.localStorage.getItem("user"))
+      gameHolder.start(name)
     }
 
   }
