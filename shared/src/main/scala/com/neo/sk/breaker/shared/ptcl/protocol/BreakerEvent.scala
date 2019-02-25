@@ -21,7 +21,7 @@ object BreakerEvent {
 
   final case object RoomLink extends GameFrontEvent
 
-  final case class ShieldMove(hPosition: Short) extends GameFrontEvent with GamePlayEvent
+  final case class ShieldMove(hPosition: Int) extends GameFrontEvent with GamePlayEvent
 
   final case class SendEmoji(t: Byte) extends GameFrontEvent
 

@@ -269,10 +269,12 @@ case class BreakerDoublePlay(
 
   override def instantExecuteUserEvent(event: GamePlayEvent): Int = {
     event match {
-      case ShieldMove(dir) =>
-        if(dir == 1 && shield.position.x > 1) shield.changePosition(1)
-        else if(dir == 2 && shield.position.x + shield.width < boundary.x - 1) shield.changePosition(2)
+      case ShieldMove(clientX) =>
+        val shieldX = if(clientX > 10000) clientX else clientX - myWindowView.x - shield.width / 2
+        val finalX = if(shieldX < 0) 0 else if(shieldX > boundary.x - shield.width) boundary.x - shield.width else shieldX
+        shield.changePosition(finalX)
         GameState.remain
+
       case ShowEmoji(userName, t) =>
         emojiList = Emoji(userName, t, 40) :: emojiList
         GameState.remain

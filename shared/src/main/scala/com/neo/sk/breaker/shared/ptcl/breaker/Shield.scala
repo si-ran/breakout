@@ -22,7 +22,7 @@ trait Shield extends RectangleOfBreaker{
 
   override val height: Float
 
-  val speed: Byte
+  val speed: Int
 
 }
 
@@ -34,15 +34,17 @@ class ShieldClient(initPosition: Point) extends Shield {
 
   override val height: Float = 40
 
-  override val speed: Byte = 20
+  override val speed: Int = 40
 
-  def changePosition(direction: Byte): Unit ={
-    direction match {
-      case 1 =>
-        position = Point(position.x - speed, position.y)
-      case 2 =>
-        position = Point(position.x + speed, position.y)
-      case _ => ()
+  def changePosition(clientX: Float): Unit ={
+    if(clientX < 10000){
+      position = Point(clientX, position.y)
+    }
+    else if(clientX < 20000){
+      position = Point(position.x - speed, position.y)
+    }
+    else{
+      position = Point(position.x + speed, position.y)
     }
   }
 }

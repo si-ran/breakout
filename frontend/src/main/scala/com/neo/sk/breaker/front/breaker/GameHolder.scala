@@ -265,6 +265,9 @@ class GameHolder(canvasName:String) {
 
   def menuActionListenEvent(): Unit ={
     canvas.focus()
+    canvas.onmousemove = {e: MouseEvent =>
+      e.preventDefault()
+    }
     canvas.onmousedown = {e: MouseEvent =>
       breakerSchemaImplOpt.foreach{ breakerSchemaImpl =>
         val state = breakerSchemaImpl.instantExecuteUserEvent(BreakerEvent.MouseClick(e.clientX, e.clientY))
@@ -279,6 +282,9 @@ class GameHolder(canvasName:String) {
 
   def soloActionListenEvent(): Unit ={
     canvas.focus()
+    canvas.onmousemove = { e:MouseEvent =>
+      e.preventDefault()
+    }
     canvas.onmousedown = { e:MouseEvent =>
       e.preventDefault()
     }
@@ -298,6 +304,10 @@ class GameHolder(canvasName:String) {
   def doubleActionListenEvent(): Unit ={
     canvas.focus()
     canvas.oncontextmenu = _ => false //取消右键弹出行为
+    canvas.onmousemove = { e:MouseEvent =>
+      breakerSchemaImplOpt.foreach(_.instantExecuteUserEvent(BreakerEvent.ShieldMove(e.clientX.toShort)))
+      e.preventDefault()
+    }
     canvas.onmousedown = { e:MouseEvent =>
       e.button match {
         case 0 =>
@@ -332,7 +342,7 @@ class GameHolder(canvasName:String) {
           websocketClient.sendByteMsg(SendEmoji(7))
         case "8" =>
           websocketClient.sendByteMsg(SendEmoji(8))
-        case "q" =>
+        case key if key == "q" || key == "Q" =>
           //FIXME 冗余写法
           if(breakerSchemaImplOpt.map(_.isInstanceOf[BreakerDoublePlay]).get)
             if(breakerSchemaImplOpt.get.asInstanceOf[BreakerDoublePlay].gameSkillValue >= 5)
@@ -340,12 +350,20 @@ class GameHolder(canvasName:String) {
           breakerSchemaImplOpt.foreach(_.preExecuteUserEvent(BreakerEvent.ShotGun))
         case "e" =>
 
-        case "a" =>
-          breakerSchemaImplOpt.foreach(_.instantExecuteUserEvent(BreakerEvent.ShieldMove(1)))
-        case "d" =>
-          breakerSchemaImplOpt.foreach(_.instantExecuteUserEvent(BreakerEvent.ShieldMove(2)))
+        case key if key == "a" || key == "A" =>
+          breakerSchemaImplOpt.foreach(_.instantExecuteUserEvent(BreakerEvent.ShieldMove(10001)))
+        case key if key == "d" || key == "D" =>
+          breakerSchemaImplOpt.foreach(_.instantExecuteUserEvent(BreakerEvent.ShieldMove(20001)))
         case _ =>
-          println("unknown")
+          println(s"unknown:${e.key}")
+      }
+      e.keyCode match {
+        case 37 =>
+          breakerSchemaImplOpt.foreach(_.instantExecuteUserEvent(BreakerEvent.ShieldMove(10001)))
+        case 39 =>
+          breakerSchemaImplOpt.foreach(_.instantExecuteUserEvent(BreakerEvent.ShieldMove(20001)))
+        case _ =>
+
       }
       e.preventDefault()
     }
