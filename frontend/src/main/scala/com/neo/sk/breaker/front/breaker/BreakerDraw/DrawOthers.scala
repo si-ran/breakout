@@ -14,6 +14,21 @@ import scala.reflect.internal.util.OffsetPosition
   */
 trait DrawOthers { this: BreakerDoublePlay =>
 
+  def drawBack(): Unit ={
+    ctx.save()
+    val grd = ctx.createLinearGradient(
+      0,
+      0,
+      0,
+      500,
+    )
+    grd.addColorStop(0, "#f7ebff")
+    grd.addColorStop(1, "#ffffff")
+    ctx.fillStyle = grd
+    ctx.fillRect(0,0,canvasBoundary.x,500)
+    ctx.restore()
+  }
+
   def drawBorder(name: String, scale: Double, offsetPosition: Point): Unit ={
     val fontSize = if(name == myName) "21px" else "15px"
 
@@ -24,6 +39,17 @@ trait DrawOthers { this: BreakerDoublePlay =>
     ctx.fillText(s"$name", offsetPosition.x, offsetPosition.y - 3)
     ctx.rect(offsetPosition.x, offsetPosition.y, boundary.x * scale, boundary.y * scale)
     ctx.stroke()
+    ctx.restore()
+    //提示
+    ctx.save()
+    ctx.font = s"17px arial"
+    ctx.fillStyle = "#666666"
+    ctx.textAlign = "left"
+    ctx.fillText("A: 左移; D: 右移", 1100, 50)
+    ctx.fillText("Q: 消耗5P释放散弹", 1100, 80)
+    ctx.fillText("鼠标左右键: 平移小球", 1100, 110)
+    ctx.fillText("1~8: 表情", 1100, 140)
+    ctx.fillText("砖块落到红线以下输", 1100, 180)
     ctx.restore()
     //红线
     ctx.save()
@@ -63,7 +89,7 @@ trait DrawOthers { this: BreakerDoublePlay =>
     ctx.save()
     ctx.font = "30px Comic Sans Ms"
     ctx.textAlign = "left"
-    ctx.fillText(s"$gameSkillValue", 260, 520)
+    ctx.fillText(s"$gameSkillValue P", 260, 520)
     ctx.restore()
   }
 

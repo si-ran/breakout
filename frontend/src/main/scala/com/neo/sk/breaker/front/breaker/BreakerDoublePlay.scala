@@ -73,6 +73,7 @@ case class BreakerDoublePlay(
     ctx.save()
 
     ctx.clearRect(0, 0, dom.window.innerWidth, dom.window.innerHeight)
+    drawBack()
 
     drawEmojiList()
     drawSkillValue()
@@ -250,15 +251,15 @@ case class BreakerDoublePlay(
         isPearlTrans = dir
       case AddBricks =>
         isAddBricks = true
-        addBricksTime = 120
+        addBricksTime = 150
       case MinusScore(score) =>
         gameEnergy -= score
       case ShotGun =>
-        if (gameSkillValue >= 4){
+        if (gameSkillValue >= 5){
           shotPearls = (0 to 2).toList.map{ _ =>
             new PearlClient(pearl.position, pearl.speed + Point(random.nextFloat() * pearl.speed.x, random.nextFloat() * pearl.speed.y))
           } ::: shotPearls
-          gameSkillValue -= 4
+          gameSkillValue -= 5
         }
       case DrawShotGun =>
         drawShotTime = 40

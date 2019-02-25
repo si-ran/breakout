@@ -335,7 +335,7 @@ class GameHolder(canvasName:String) {
         case "q" =>
           //FIXME 冗余写法
           if(breakerSchemaImplOpt.map(_.isInstanceOf[BreakerDoublePlay]).get)
-            if(breakerSchemaImplOpt.get.asInstanceOf[BreakerDoublePlay].gameSkillValue >= 4)
+            if(breakerSchemaImplOpt.get.asInstanceOf[BreakerDoublePlay].gameSkillValue >= 5)
               websocketClient.sendByteMsg(BreakerEvent.SendShot)
           breakerSchemaImplOpt.foreach(_.preExecuteUserEvent(BreakerEvent.ShotGun))
         case "e" =>
