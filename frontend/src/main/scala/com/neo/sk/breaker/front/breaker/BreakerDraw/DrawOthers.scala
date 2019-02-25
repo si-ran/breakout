@@ -5,8 +5,6 @@ import com.neo.sk.breaker.shared.ptcl.model.Point
 import org.scalajs.dom
 import org.scalajs.dom.html
 
-import scala.reflect.internal.util.OffsetPosition
-
 /**
   * User: XuSiRan
   * Date: 2019/2/18
@@ -125,7 +123,7 @@ trait DrawOthers { this: BreakerDoublePlay =>
   }
 
   //画提示文字
-  def drawText(point: Point) ={
+  def drawText(point: Point): Unit ={
     ctx.save()
     ctx.beginPath()
     ctx.font = "bold 30px Comic Sans Ms"

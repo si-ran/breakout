@@ -42,12 +42,17 @@ object Login extends Page{
     val account = dom.document.getElementById("loginAccount").asInstanceOf[Input].value
     val password = dom.document.getElementById("loginPassword").asInstanceOf[Input].value
 
-    Http.postJsonAndParse[LoginUserRsp](Routes.Login.userLogin, LoginReq(account, password).asJson.noSpaces).map{
-      case LoginUserRsp(name, 0, "ok") =>
-        dom.window.localStorage.setItem("user", s"$name")
-        dom.window.location.hash = s"/play/$name"
-      case LoginUserRsp(_, errCode, msg) =>
-        JsFunc.alert(s"$msg")
+    if(account.isEmpty){
+      JsFunc.alert(s"账号不能为空")
+    }
+    else {
+      Http.postJsonAndParse[LoginUserRsp](Routes.Login.userLogin, LoginReq(account, password).asJson.noSpaces).map{
+        case LoginUserRsp(name, 0, "ok") =>
+          dom.window.localStorage.setItem("user", s"$name")
+          dom.window.location.hash = s"/play/$name"
+        case LoginUserRsp(_, errCode, msg) =>
+          JsFunc.alert(s"$msg")
+      }
     }
   }
 
